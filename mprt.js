@@ -9,32 +9,26 @@ class Problem {
     static prefix = ".fasta";
     static motifRegex = /N(?=[^P][ST][^P])/g;
 
-    solve() {
-        let space = {};
+    async solve() {
         const uniprotIds = this.#s.split("\n");
-        const array = uniprotIds.map(elm => Problem.suffix + elm.split('_')[0] + Problem.prefix);
-        array.map(url => space[url] = uniprotIds[array.indexOf(url)]);
-
-        for (const url of array) {
-            const seq = fetch(url)
-                .then(response => response.text())
-                .then(data => data.split('\n').slice(1).join(''))
-                .then(sequence => sequence)
-            const positions = [];
-            let match;
-            seq
-                .then(sequence => {
-                    while ((match = Problem.motifRegex.exec(sequence)) !== null) {
-                        positions.push(match.index + 1);
-                    }
-                    return positions;
-                })
-                .then(positions => {
-                    if (positions.length > 0) {
-                        console.log(space[url]);
-                        console.log(positions.join(' '));
-                    }
-                });
+        for (const id of uniprotIds) {
+            const url = Problem.suffix + id.split('_')[0] + Problem.prefix;
+            try {
+                const response = await fetch(url);
+                const data = await response.text();
+                const sequence = data.split('\n').slice(1).join('');
+                const positions = [];
+                let match;
+                while ((match = Problem.motifRegex.exec(sequence)) !== null) {
+                    positions.push(match.index + 1);
+                }
+                if (positions.length > 0) {
+                    console.log(id);
+                    console.log(positions.join(' '));
+                }
+            } catch (error) {
+                console.error(`Failed to fetch sequence for ${id}: ${error}`);
+            }
         }
     }
 }
@@ -54,4 +48,4 @@ B5ZC00
 P03395_ENV_MLVFR
 B4S2L7`
 );
-problem.solve();
+problem.solve(); // node mprt.js
