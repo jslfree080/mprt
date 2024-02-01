@@ -10,12 +10,10 @@ class Problem {
     static motifRegex = /N(?=[^P][ST][^P])/g;
 
     solve() {
-        let result = "";
         let space = {};
         const uniprotIds = this.#s.split("\n");
         const array = uniprotIds.map(elm => Problem.suffix + elm.split('_')[0] + Problem.prefix);
         array.map(url => space[url] = uniprotIds[array.indexOf(url)]);
-        // console.log(space);
 
         for (const url of array) {
             const seq = fetch(url)
